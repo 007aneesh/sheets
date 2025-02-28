@@ -155,14 +155,14 @@ const StaticToolbar = ({
             p={3}
             bgcolor={'#0D4715'}
             borderRadius={'50%'}
-            width={50}
+            width={40}
             color={'#FFF'}
-            height={50}
+            height={40}
             display="flex"
             justifyContent="center"
             alignItems="center"
           >
-            {utils?.get_initial_contents('Satwik Kanhere')}
+            {utils?.get_initial_contents('Aneesh Kumar')}
           </Grid2>
         </Grid2>
       </Grid2>
