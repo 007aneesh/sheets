@@ -162,7 +162,7 @@ const StaticToolbar = ({
             justifyContent="center"
             alignItems="center"
           >
-            {utils?.get_initial_contents('Aneesh Kumar')}
+            A
           </Grid2>
         </Grid2>
       </Grid2>

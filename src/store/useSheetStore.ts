@@ -1,8 +1,8 @@
 //@ts-nocheck
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
-import { SheetState, CellData, CellStyle } from '../types/sheet';
-import { evaluateFormula } from '../utils/formulas';
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
+import { SheetState, CellData, CellStyle } from "../types/sheet";
+import { evaluateFormula } from "../utils/formulas";
 
 const DEFAULT_CELL_STYLE: CellStyle = {
   bold: false,
@@ -10,12 +10,11 @@ const DEFAULT_CELL_STYLE: CellStyle = {
   underline: false, // Default as false
   strikethrough: false, // Default as false
   fontSize: 14,
-  color: '#000000',
-  backgroundColor: '#ffffff',
-  textAlign: 'left',
-  fontFamily: 'Arial, sans-serif',
+  color: "#000000",
+  backgroundColor: "#ffffff",
+  textAlign: "left",
+  fontFamily: "Arial, sans-serif",
 };
-
 
 const DEFAULT_COLUMN_WIDTH = 100;
 const DEFAULT_ROW_HEIGHT = 24;
@@ -28,19 +27,19 @@ export interface SheetStore extends SheetState {
   setSelectedRange: (range: string[] | null) => void;
   setColumnWidth: (colId: string, width: number) => void;
   setRowHeight: (rowId: string, height: number) => void;
-  
+
   // Add new operations
   addRow: (afterRowIndex: number) => void;
   addColumn: (afterColIndex: number) => void;
   deleteRow: (rowIndex: number) => void;
   deleteColumn: (colIndex: number) => void;
-  
+
   undoAction: () => void;
   redoAction: () => void;
   canUndo: boolean;
   canRedo: boolean;
   findAndReplace: (findText: string, replaceText: string) => void;
-  
+
   // Add references to total row/column counts
   totalRows: number;
   totalColumns: number;
@@ -58,16 +57,19 @@ type HistoryState = {
 };
 
 // Helper function to get column letter from index
-const getColumnLabel = (index: number): string => String.fromCharCode(65 + index);
+const getColumnLabel = (index: number): string =>
+  String.fromCharCode(65 + index);
 
 // Helper function to parse cell ID into row and column indices
-const parseCellId = (cellId: string): { colIndex: number, rowIndex: number } => {
-  const colLetter = cellId.match(/[A-Z]+/)?.[0] || 'A';
-  const rowNumber = parseInt(cellId.match(/\d+/)?.[0] || '1', 10);
-  
+const parseCellId = (
+  cellId: string
+): { colIndex: number; rowIndex: number } => {
+  const colLetter = cellId.match(/[A-Z]+/)?.[0] || "A";
+  const rowNumber = parseInt(cellId.match(/\d+/)?.[0] || "1", 10);
+
   const colIndex = colLetter.charCodeAt(0) - 65; // A = 0, B = 1, etc.
   const rowIndex = rowNumber - 1; // 1-based to 0-based
-  
+
   return { colIndex, rowIndex };
 };
 
@@ -81,20 +83,21 @@ export const useSheetStore = create<SheetStore>()(
     // Initialize history stacks
     const undoStack: HistoryState[] = [];
     const redoStack: HistoryState[] = [];
-    
+
     // Helper to save current state to history
     const saveToHistory = () => {
-      const { cells, columnWidths, rowHeights, totalRows, totalColumns } = get();
+      const { cells, columnWidths, rowHeights, totalRows, totalColumns } =
+        get();
       undoStack.push({
         cells: JSON.parse(JSON.stringify(cells)),
         columnWidths: JSON.parse(JSON.stringify(columnWidths)),
         rowHeights: JSON.parse(JSON.stringify(rowHeights)),
         totalRows,
-        totalColumns
+        totalColumns,
       });
       // Clear redo stack when a new action is performed
       redoStack.length = 0;
-      set(state => {
+      set((state) => {
         state.canUndo = undoStack.length > 0;
         state.canRedo = redoStack.length > 0;
       });
@@ -115,16 +118,16 @@ export const useSheetStore = create<SheetStore>()(
         // Save current state before making changes
         saveToHistory();
 
-        set(state => {
+        set((state) => {
           if (!state.cells[cellId]) {
             state.cells[cellId] = {
-              value: '',
-              formula: '',
+              value: "",
+              formula: "",
               style: { ...DEFAULT_CELL_STYLE },
             };
           }
           state.cells[cellId].value = value;
-          state.cells[cellId].formula = '';
+          state.cells[cellId].formula = "";
         });
       },
 
@@ -132,11 +135,11 @@ export const useSheetStore = create<SheetStore>()(
         // Save current state before making changes
         saveToHistory();
 
-        set(state => {
+        set((state) => {
           if (!state.cells[cellId]) {
             state.cells[cellId] = {
-              value: '',
-              formula: '',
+              value: "",
+              formula: "",
               style: { ...DEFAULT_CELL_STYLE },
             };
           }
@@ -144,32 +147,34 @@ export const useSheetStore = create<SheetStore>()(
           state.cells[cellId].value = evaluateFormula(formula, state.cells);
         });
       },
-      
- 
+
       setCellStyle: (cellId, style) => {
         // Save current state before making changes
         saveToHistory();
-      
-        set(state => {
+
+        set((state) => {
           if (!state.cells[cellId]) {
             state.cells[cellId] = {
-              value: '',
-              formula: '',
+              value: "",
+              formula: "",
               style: { ...DEFAULT_CELL_STYLE },
             };
           }
-          
-          state.cells[cellId].style = { ...state.cells[cellId].style, ...style };
+
+          state.cells[cellId].style = {
+            ...state.cells[cellId].style,
+            ...style,
+          };
         });
       },
 
       setSelectedCell: (cellId) =>
-        set(state => {
+        set((state) => {
           state.selectedCell = cellId;
         }),
 
       setSelectedRange: (range) =>
-        set(state => {
+        set((state) => {
           state.selectedRange = range;
         }),
 
@@ -177,45 +182,42 @@ export const useSheetStore = create<SheetStore>()(
         // Save current state before making changes
         saveToHistory();
 
-        set(state => {
+        set((state) => {
           state.columnWidths[colId] = width;
         });
       },
 
       setRowHeight: (rowId, height) => {
-        // Save current state before making changes
         saveToHistory();
 
         set(state => {
           state.rowHeights[rowId] = height;
         });
       },
-      
-      setTotalRows: (count) => 
-        set(state => {
+
+      setTotalRows: (count) =>
+        set((state) => {
           state.totalRows = count;
         }),
-        
-      setTotalColumns: (count) => 
-        set(state => {
+
+      setTotalColumns: (count) =>
+        set((state) => {
           state.totalColumns = count;
         }),
-      
+
       // Add a new row after the specified row index
       addRow: (afterRowIndex) => {
         saveToHistory();
-        
-        set(state => {
-          // Increment total row count
+
+        set((state) => {
           state.totalRows += 1;
-          
-          // Shift existing cells down
+
           const newCells: Record<string, CellData> = {};
-          
+
           // Copy existing cells with adjustments
           Object.entries(state.cells).forEach(([cellId, cellData]) => {
             const { colIndex, rowIndex } = parseCellId(cellId);
-            
+
             if (rowIndex > afterRowIndex) {
               // This cell needs to be moved down
               const newRowIndex = rowIndex + 1;
@@ -226,9 +228,9 @@ export const useSheetStore = create<SheetStore>()(
               newCells[cellId] = cellData;
             }
           });
-          
+
           state.cells = newCells;
-          
+
           // Shift row heights
           const newRowHeights: Record<string, number> = {};
           Object.entries(state.rowHeights).forEach(([rowId, height]) => {
@@ -239,29 +241,29 @@ export const useSheetStore = create<SheetStore>()(
               newRowHeights[rowId] = height;
             }
           });
-          
+
           // Set the new row's height to default
           newRowHeights[`${afterRowIndex + 2}`] = DEFAULT_ROW_HEIGHT;
-          
+
           state.rowHeights = newRowHeights;
         });
       },
-      
+
       // Add a new column after the specified column index
       addColumn: (afterColIndex) => {
         saveToHistory();
-        
-        set(state => {
+
+        set((state) => {
           // Increment total column count
           state.totalColumns += 1;
-          
+
           // Shift existing cells right
           const newCells: Record<string, CellData> = {};
-          
+
           // Copy existing cells with adjustments
           Object.entries(state.cells).forEach(([cellId, cellData]) => {
             const { colIndex, rowIndex } = parseCellId(cellId);
-            
+
             if (colIndex > afterColIndex) {
               // This cell needs to be moved right
               const newColIndex = colIndex + 1;
@@ -272,9 +274,9 @@ export const useSheetStore = create<SheetStore>()(
               newCells[cellId] = cellData;
             }
           });
-          
+
           state.cells = newCells;
-          
+
           // Shift column widths
           const newColumnWidths: Record<string, number> = {};
           Object.entries(state.columnWidths).forEach(([colId, width]) => {
@@ -286,35 +288,35 @@ export const useSheetStore = create<SheetStore>()(
               newColumnWidths[colId] = width;
             }
           });
-          
+
           // Set the new column's width to default
           const newColId = String.fromCharCode(afterColIndex + 1 + 65);
           newColumnWidths[newColId] = DEFAULT_COLUMN_WIDTH;
-          
+
           state.columnWidths = newColumnWidths;
         });
       },
-      
+
       // Delete the row at the specified index
       deleteRow: (rowIndex) => {
         saveToHistory();
-        
-        set(state => {
+
+        set((state) => {
           if (state.totalRows <= 1) {
             // Prevent deleting the last row
             return;
           }
-          
+
           // Decrement total row count
           state.totalRows -= 1;
-          
+
           // Shift existing cells up
           const newCells: Record<string, CellData> = {};
-          
+
           // Copy existing cells with adjustments, skipping the deleted row
           Object.entries(state.cells).forEach(([cellId, cellData]) => {
             const parsedCell = parseCellId(cellId);
-            
+
             if (parsedCell.rowIndex === rowIndex) {
               // Skip this cell (it's being deleted)
               return;
@@ -328,9 +330,9 @@ export const useSheetStore = create<SheetStore>()(
               newCells[cellId] = cellData;
             }
           });
-          
+
           state.cells = newCells;
-          
+
           // Shift row heights
           const newRowHeights: Record<string, number> = {};
           Object.entries(state.rowHeights).forEach(([rowId, height]) => {
@@ -344,31 +346,31 @@ export const useSheetStore = create<SheetStore>()(
               newRowHeights[rowId] = height;
             }
           });
-          
+
           state.rowHeights = newRowHeights;
         });
       },
-      
+
       // Delete the column at the specified index
       deleteColumn: (colIndex) => {
         saveToHistory();
-        
-        set(state => {
+
+        set((state) => {
           if (state.totalColumns <= 1) {
             // Prevent deleting the last column
             return;
           }
-          
+
           // Decrement total column count
           state.totalColumns -= 1;
-          
+
           // Shift existing cells left
           const newCells: Record<string, CellData> = {};
-          
+
           // Copy existing cells with adjustments, skipping the deleted column
           Object.entries(state.cells).forEach(([cellId, cellData]) => {
             const parsedCell = parseCellId(cellId);
-            
+
             if (parsedCell.colIndex === colIndex) {
               // Skip this cell (it's being deleted)
               return;
@@ -382,9 +384,9 @@ export const useSheetStore = create<SheetStore>()(
               newCells[cellId] = cellData;
             }
           });
-          
+
           state.cells = newCells;
-          
+
           // Shift column widths
           const newColumnWidths: Record<string, number> = {};
           Object.entries(state.columnWidths).forEach(([colId, width]) => {
@@ -399,7 +401,7 @@ export const useSheetStore = create<SheetStore>()(
               newColumnWidths[colId] = width;
             }
           });
-          
+
           state.columnWidths = newColumnWidths;
         });
       },
@@ -414,14 +416,14 @@ export const useSheetStore = create<SheetStore>()(
           columnWidths: JSON.parse(JSON.stringify(currentState.columnWidths)),
           rowHeights: JSON.parse(JSON.stringify(currentState.rowHeights)),
           totalRows: currentState.totalRows,
-          totalColumns: currentState.totalColumns
+          totalColumns: currentState.totalColumns,
         });
 
         // Get the previous state from undo stack
         const previousState = undoStack.pop()!;
 
         // Apply the previous state
-        set(state => {
+        set((state) => {
           state.cells = previousState.cells;
           state.columnWidths = previousState.columnWidths;
           state.rowHeights = previousState.rowHeights;
@@ -442,14 +444,14 @@ export const useSheetStore = create<SheetStore>()(
           columnWidths: JSON.parse(JSON.stringify(currentState.columnWidths)),
           rowHeights: JSON.parse(JSON.stringify(currentState.rowHeights)),
           totalRows: currentState.totalRows,
-          totalColumns: currentState.totalColumns
+          totalColumns: currentState.totalColumns,
         });
 
         // Get the next state from redo stack
         const nextState = redoStack.pop()!;
 
         // Apply the next state
-        set(state => {
+        set((state) => {
           state.cells = nextState.cells;
           state.columnWidths = nextState.columnWidths;
           state.rowHeights = nextState.rowHeights;
@@ -462,22 +464,22 @@ export const useSheetStore = create<SheetStore>()(
 
       findAndReplace: (findText, replaceText) => {
         if (!findText) return;
-        
+
         // Save current state before making changes
         saveToHistory();
-        
+
         let changesMade = false;
-        
-        set(state => {
-          Object.keys(state.cells).forEach(cellId => {
+
+        set((state) => {
+          Object.keys(state.cells).forEach((cellId) => {
             const cell = state.cells[cellId];
-            
+
             // Replace in value
             if (cell.value && cell.value.includes(findText)) {
               cell.value = cell?.value?.replaceAll(findText, replaceText);
               changesMade = true;
             }
-            
+
             // Replace in formula
             if (cell.formula && cell.formula.includes(findText)) {
               const newFormula = cell.formula.replaceAll(findText, replaceText);
@@ -485,21 +487,21 @@ export const useSheetStore = create<SheetStore>()(
               try {
                 cell.value = evaluateFormula(newFormula, state.cells);
               } catch (error) {
-                cell.value = '#ERROR!';
+                cell.value = "#ERROR!";
               }
               changesMade = true;
             }
           });
         });
-        
+
         // If no changes were made, remove the history entry
         if (!changesMade) {
           undoStack.pop();
-          set(state => {
+          set((state) => {
             state.canUndo = undoStack.length > 0;
           });
         }
-      }
+      },
     };
   })
 );

@@ -4,8 +4,8 @@ import { useSheetStore } from '../store/useSheetStore';
 import {
   Bold,
   Italic,
-  Underline, // Import underline icon
-  Strikethrough, // Import strikethrough icon
+  Underline, 
+  Strikethrough, 
   Type,
   Palette,
   AlignLeft,
@@ -38,6 +38,10 @@ export const Toolbar: React.FC = () => {
   const [findText, setFindText] = useState('');
   const [replaceText, setReplaceText] = useState('');
 
+  const fontSizes = [
+    8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72,
+  ];
+
   const handleStyleChange = (styleUpdate: any) => {
     if (!selectedCell) return;
     setCellStyle(selectedCell, styleUpdate);
@@ -49,8 +53,24 @@ export const Toolbar: React.FC = () => {
   };
 
   const currentCell = selectedCell ? cells[selectedCell] : null;
+  const currentFontSize = currentCell?.style.fontSize || 14;
 
-  // Font families
+  const increaseFontSize = () => {
+    const currentIndex = fontSizes.indexOf(currentFontSize);
+    if (currentIndex < fontSizes.length - 1) {
+      const newSize = fontSizes[currentIndex + 1];
+      handleStyleChange({ fontSize: newSize });
+    }
+  };
+
+  const decreaseFontSize = () => {
+    const currentIndex = fontSizes.indexOf(currentFontSize);
+    if (currentIndex > 0) {
+      const newSize = fontSizes[currentIndex - 1];
+      handleStyleChange({ fontSize: newSize });
+    }
+  };
+
   const fontFamilies = [
     { value: 'Arial, sans-serif', label: 'Arial' },
     { value: 'Helvetica, sans-serif', label: 'Helvetica' },
@@ -64,25 +84,30 @@ export const Toolbar: React.FC = () => {
   return (
     <div className="flex flex-col  mb-1 mx-6">
       <div className="flex bg-[#f0f4f9] rounded-full items-center gap-5 p-1 ">
-        {/* Undo/Redo Section */}
         <div className="flex items-center gap-1 border-r pr-2">
           <div className="flex items-center gap-1">
             <button
-              className={`p-2 px-5 rounded-full mx-2 hover:bg-gray-100 bg-white text-sm flex items-center gap-2 ${findReplaceOpen ? 'bg-gray-200' : ''}`}
+              className={`p-2 px-5 rounded-full mx-2 hover:bg-gray-100 bg-white text-sm flex items-center gap-2 ${
+                findReplaceOpen ? "bg-gray-200" : ""
+              }`}
               onClick={() => setFindReplaceOpen(!findReplaceOpen)}
             >
               <Search size={16} /> Menus
             </button>
           </div>
           <button
-            className={`p-1 hover:bg-gray-100 rounded ${!canUndo ? 'opacity-50' : ''}`}
+            className={`p-1 hover:bg-gray-100 rounded ${
+              !canUndo ? "opacity-50" : ""
+            }`}
             onClick={undoAction}
             disabled={!canUndo}
           >
             <Undo size={16} />
           </button>
           <button
-            className={`p-1 hover:bg-gray-100 rounded ${!canRedo ? 'opacity-50' : ''}`}
+            className={`p-1 hover:bg-gray-100 rounded ${
+              !canRedo ? "opacity-50" : ""
+            }`}
             onClick={redoAction}
             disabled={!canRedo}
           >
@@ -90,54 +115,74 @@ export const Toolbar: React.FC = () => {
           </button>
         </div>
 
-        {/* Text Style Section */}
         <div className="flex items-center gap-1 border-r pr-2">
           <button
-            className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.bold ? 'bg-gray-200' : ''}`}
-            onClick={() => handleStyleChange({ bold: !currentCell?.style.bold })}
+            className={`p-1 hover:bg-gray-100 rounded ${
+              currentCell?.style.bold ? "bg-gray-200" : ""
+            }`}
+            onClick={() =>
+              handleStyleChange({ bold: !currentCell?.style.bold })
+            }
           >
             <Bold size={16} />
           </button>
           <button
-            className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.italic ? 'bg-gray-200' : ''}`}
-            onClick={() => handleStyleChange({ italic: !currentCell?.style.italic })}
+            className={`p-1 hover:bg-gray-100 rounded ${
+              currentCell?.style.italic ? "bg-gray-200" : ""
+            }`}
+            onClick={() =>
+              handleStyleChange({ italic: !currentCell?.style.italic })
+            }
           >
             <Italic size={16} />
           </button>
-          {/* Add Underline Button */}
           <button
-            className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.underline ? 'bg-gray-200' : ''}`}
-            onClick={() => handleStyleChange({ underline: !currentCell?.style.underline })}
+            className={`p-1 hover:bg-gray-100 rounded ${
+              currentCell?.style.underline ? "bg-gray-200" : ""
+            }`}
+            onClick={() =>
+              handleStyleChange({ underline: !currentCell?.style.underline })
+            }
           >
             <Underline size={16} />
           </button>
-          {/* Add Strikethrough Button */}
           <button
-            className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.strikethrough ? 'bg-gray-200' : ''}`}
-            onClick={() => handleStyleChange({ strikethrough: !currentCell?.style.strikethrough })}
+            className={`p-1 hover:bg-gray-100 rounded ${
+              currentCell?.style.strikethrough ? "bg-gray-200" : ""
+            }`}
+            onClick={() =>
+              handleStyleChange({
+                strikethrough: !currentCell?.style.strikethrough,
+              })
+            }
           >
             <Strikethrough size={16} />
           </button>
         </div>
 
-        {/* Text Alignment Section */}
         <div className="flex items-center border-r gap-5  pr-2">
           <div className="flex bg-[#f0f4f9] rounded-full items-center gap-2 p-2 ">
             <button
-              className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.textAlign === 'left' ? 'bg-gray-200' : ''}`}
-              onClick={() => handleStyleChange({ textAlign: 'left' })}
+              className={`p-1 hover:bg-gray-100 rounded ${
+                currentCell?.style.textAlign === "left" ? "bg-gray-200" : ""
+              }`}
+              onClick={() => handleStyleChange({ textAlign: "left" })}
             >
               <AlignLeft size={16} />
             </button>
             <button
-              className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.textAlign === 'center' ? 'bg-gray-200' : ''}`}
-              onClick={() => handleStyleChange({ textAlign: 'center' })}
+              className={`p-1 hover:bg-gray-100 rounded ${
+                currentCell?.style.textAlign === "center" ? "bg-gray-200" : ""
+              }`}
+              onClick={() => handleStyleChange({ textAlign: "center" })}
             >
               <AlignCenter size={16} />
             </button>
             <button
-              className={`p-1 hover:bg-gray-100 rounded ${currentCell?.style.textAlign === 'right' ? 'bg-gray-200' : ''}`}
-              onClick={() => handleStyleChange({ textAlign: 'right' })}
+              className={`p-1 hover:bg-gray-100 rounded ${
+                currentCell?.style.textAlign === "right" ? "bg-gray-200" : ""
+              }`}
+              onClick={() => handleStyleChange({ textAlign: "right" })}
             >
               <AlignRight size={16} />
             </button>
@@ -147,29 +192,46 @@ export const Toolbar: React.FC = () => {
         {/* Font Controls Section */}
         <div className="flex items-center gap-2 border-r pr-2">
           <div className="flex items-center gap-5">
-            <div className='mx-3 flex items-center gap-2'>
-              <Minus size={16} />
+            <div className="mx-3 flex items-center gap-2">
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={decreaseFontSize}
+                disabled={fontSizes.indexOf(currentFontSize) === 0}
+              >
+                <Minus size={16} />
+              </button>
               <select
                 className="border rounded p-1 custom-select"
-                value={currentCell?.style.fontSize || 14}
-                onChange={(e) => handleStyleChange({ fontSize: Number(e.target.value) })}
+                value={currentFontSize}
+                onChange={(e) =>
+                  handleStyleChange({ fontSize: Number(e.target.value) })
+                }
               >
-                {[8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72].map((size) => (
-                  <option key={size} value={size} className='text-center'>
+                {fontSizes.map((size) => (
+                  <option key={size} value={size} className="text-center">
                     {size}
                   </option>
                 ))}
               </select>
-              <Plus size={16} />
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={increaseFontSize}
+                disabled={
+                  fontSizes.indexOf(currentFontSize) === fontSizes.length - 1
+                }
+              >
+                <Plus size={16} />
+              </button>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
             <select
               className="border rounded p-1"
-              value={currentCell?.style.fontFamily || 'Arial, sans-serif'}
-              onChange={(e) => handleStyleChange({ fontFamily: e.target.value })}
-
+              value={currentCell?.style.fontFamily || "Arial, sans-serif"}
+              onChange={(e) =>
+                handleStyleChange({ fontFamily: e.target.value })
+              }
             >
               {fontFamilies.map((font) => (
                 <option key={font.value} value={font.value}>
@@ -183,32 +245,35 @@ export const Toolbar: React.FC = () => {
         {/* Color Controls Section */}
         <div className="flex items-center gap-2 border-r pr-2">
           <div className="flex items-center flex-col " title="Text Color">
-            <CustomText type='H1' style={{ fontWeight: 'normal' }}>A</CustomText>
+            <CustomText type="H1" style={{ fontWeight: "normal" }}>
+              A
+            </CustomText>
             <input
               type="color"
-              value={currentCell?.style.color || '#000000'}
+              value={currentCell?.style.color || "#000000"}
               onChange={(e) => handleStyleChange({ color: e.target.value })}
               className="w-9 h-3 -mt-2 p-0 border-0"
             />
           </div>
 
-          <div className="flex items-center flex-col gap-3 mt-0.5" title="Text Color">
-            <PaintBucket size={16} className='-mb-2 pt-1' />
+          <div
+            className="flex items-center flex-col gap-3 mt-0.5"
+            title="Background Color"
+          >
+            <PaintBucket size={16} className="-mb-2 pt-1" />
             <input
               type="color"
-              value={currentCell?.style.backgroundColor || '#ffffff'}
-              onChange={(e) => handleStyleChange({ backgroundColor: e.target.value })}
+              value={currentCell?.style.backgroundColor || "#ffffff"}
+              onChange={(e) =>
+                handleStyleChange({ backgroundColor: e.target.value })
+              }
               className="w-9 h-3 p-0 border-0"
             />
           </div>
-
         </div>
-
-        {/* Find & Replace Button */}
 
       </div>
 
-      {/* Find & Replace Panel */}
       {findReplaceOpen && (
         <div className="flex items-center gap-2 p-2 border-b bg-gray-50">
           <div className="flex items-center">
